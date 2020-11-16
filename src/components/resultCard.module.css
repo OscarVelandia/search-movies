@@ -1,0 +1,27 @@
+.cardWrapper {
+  display: flex;
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+  border: 1px solid black;
+}
+
+.image {
+  width: 30%;
+  align-self: center;
+  margin: 1rem;
+}
+.descriptionWrapper {
+  width: 70%;
+  margin-right: 2rem;
+  margin-left: 2rem;
+}
+
+.descriptionWrapper > h2 {
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.descriptionWrapper > p {
+  margin-top: 2rem;
+  font-size: 1.2rem;
+}
