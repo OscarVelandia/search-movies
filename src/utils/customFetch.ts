@@ -1,43 +1,33 @@
-type CustomConfiguration = { headers?: HeadersInit };
-type HTTPMethods = "POST" | "GET" | "PUT" | "DELETE";
-
-interface Options<U = "PUT" | "DELETE"> extends CustomConfiguration {
-  body?: any;
-  method?: U;
-}
-export function customFetch<T>(
+type FetchWrapper = <T>(
   endpoint: string,
-  { body, ...customConfiguration }: Options = {}
-): Promise<T> {
-  const token = process.env.REACT_APP_API_KEY;
-  const headers: HeadersInit = { "Content-Type": "application/json" };
+  {
+    body,
+    token,
+    method,
+    ...customConfiguration
+  }?: ({ body: unknown; token?: string } & Omit<RequestInit, 'body'>) | Record<string, string>,
+) => Promise<T>
 
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
-
-  const config: Options<HTTPMethods> = {
-    method: body ? "POST" : "GET",
+export const fetchWrapper: FetchWrapper = async (
+  endpoint: string,
+  { body, token, method, ...customConfiguration } = {},
+) => {
+  const config: RequestInit = {
+    method: method ? method : body ? 'POST' : 'GET',
     ...customConfiguration,
     headers: {
-      ...headers,
-      ...customConfiguration.headers,
+      'Content-Type': 'application/json',
+      Authorization: token && `Bearer ${token}`,
+      ...(customConfiguration?.headers as Record<string, string>),
     },
-  };
-
-  if (body) {
-    config.body = JSON.stringify(body);
   }
 
-  return fetch(`${process.env.REACT_APP_API_BASE_PATH}/${endpoint}`, config).then(
-    async (response) => {
-      const data = await response.json();
+  if (body) {
+    config.body = JSON.stringify(body)
+  }
 
-      if (response.ok) {
-        return data;
-      } else {
-        return Promise.reject(data);
-      }
-    }
-  );
+  const response = await fetch(endpoint, config)
+  const data = await response.json()
+
+  return await data
 }
